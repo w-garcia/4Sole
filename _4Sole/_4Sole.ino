@@ -1,4 +1,4 @@
-
+#include "pressure.h"
 /* Turn an LED on/off based on a command send via BlueTooth
 **
 ** Credit: The following example was used as a reference
@@ -39,7 +39,8 @@ void loop()
     {
         if (inputString == "PING")
         {
-          Serial.println(ping());
+          //Serial.println(ping());
+          read_pressure();
         }
       inputString = "";
     }
