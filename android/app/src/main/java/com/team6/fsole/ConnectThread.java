@@ -1,8 +1,8 @@
 package com.team6.fsole;
 
 import android.bluetooth.BluetoothDevice;
-import android.bluetooth.BluetoothServerSocket;
 import android.bluetooth.BluetoothSocket;
+import android.os.Handler;
 import android.util.Log;
 
 import java.io.IOException;
@@ -19,20 +19,30 @@ class ConnectThread extends Thread
     static String LEFT = "left";
     static String RIGHT = "right";
 
+    // Constants for trasmitting messages between ConnectThread and UI
+    private interface MessageConstants {
+        public static final int CONNECTION_GOOD = 0;
+        public static final int CONNECTION_BAD = 1;
+        public static final int CONNECTION_CLOSE = 2;
+    }
+
+    private MapActivity mapActivityRef;
     private String sole_tag;
+    private Handler imageHandler;
 
     private final BluetoothSocket mmSocket;
     private final BluetoothManager mManager;
 
-    ConnectThread(BluetoothManager bluetoothManager, BluetoothDevice device, String tag)
+    ConnectThread(BluetoothManager bluetoothManager, BluetoothDevice device, String tag, Handler imgHandler)
     {
         BluetoothSocket temp = null;
         mManager = bluetoothManager;
         sole_tag = tag;
+        imageHandler = imgHandler;
 
         try
         {
-            UUID myUUID = UUID.fromString("1157511d-6235-4d83-9515-5c8e8a7ad124");
+            UUID myUUID = device.getUuids()[0].getUuid();
             temp = device.createRfcommSocketToServiceRecord(myUUID);
         }
         catch (IOException e)
@@ -70,11 +80,14 @@ class ConnectThread extends Thread
         // Havr connected socket here.
         if (sole_tag.equals(RIGHT))
         {
-            mManager.setRightSole(mmSocket);
+            mManager.setRightSoleSocket(mmSocket);
+            imageHandler.sendEmptyMessage(MessageConstants.CONNECTION_GOOD);
+
         }
         else
         {
-            mManager.setLeftSole(mmSocket);
+            mManager.setLeftSoleSocket(mmSocket);
+            imageHandler.sendEmptyMessage(MessageConstants.CONNECTION_GOOD);
         }
 
     }

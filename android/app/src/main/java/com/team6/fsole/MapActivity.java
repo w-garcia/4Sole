@@ -4,6 +4,8 @@ import android.app.Activity;
 import android.app.Dialog;
 import android.bluetooth.BluetoothDevice;
 import android.content.DialogInterface;
+import android.os.Handler;
+import android.os.Message;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -27,6 +29,35 @@ public class MapActivity extends AppCompatActivity
     private ImageButton _imgBtnRight;
     static String LEFT = "left";
     static String RIGHT = "right";
+
+    // Constants for trasmitting messages between ConnectThread and UI
+    private interface MessageConstants {
+        public static final int CONNECTION_GOOD = 0;
+        public static final int CONNECTION_BAD = 1;
+        public static final int CONNECTION_CLOSE = 2;
+    }
+
+    private Boolean quit = false;
+
+    private Handler leftImageHandler = new Handler() {
+        public void handleMessage(Message msg)
+        {
+            if (msg.what == MessageConstants.CONNECTION_GOOD)
+            {
+                _imgBtnLeft.setImageResource(R.drawable.foot_outline_l_small);
+            }
+        }
+    };
+
+    private Handler rightImageHandler = new Handler() {
+        public void handleMessage(Message msg)
+        {
+            if (msg.what == MessageConstants.CONNECTION_GOOD)
+            {
+                _imgBtnRight.setImageResource(R.drawable.foot_outline_r_small);
+            }
+        }
+    };
 
     @Override
     protected void onCreate(Bundle savedInstanceState)
@@ -62,7 +93,7 @@ public class MapActivity extends AppCompatActivity
                         {
                             BluetoothDevice pDevice = arrayAdapter.getItem(which);
                             //Connect here
-                            mBluetoothManager.initiateDeviceConnection(pDevice, LEFT);
+                            mBluetoothManager.initiateDeviceConnection(pDevice, LEFT, leftImageHandler);
                         }
                     });
 
@@ -93,7 +124,7 @@ public class MapActivity extends AppCompatActivity
                         {
                             BluetoothDevice pDevice = arrayAdapter.getItem(which);
                             //Connect here
-                            mBluetoothManager.initiateDeviceConnection(pDevice, RIGHT);
+                            mBluetoothManager.initiateDeviceConnection(pDevice, RIGHT, rightImageHandler);
                         }
                     });
 
@@ -101,6 +132,12 @@ public class MapActivity extends AppCompatActivity
                 }
             }
         });
+    }
+
+    @Override
+    public void onBackPressed()
+    {
+        quit = true;
     }
 
     @Override
@@ -126,5 +163,15 @@ public class MapActivity extends AppCompatActivity
         }
 
         return super.onOptionsItemSelected(item);
+    }
+
+    public ImageButton getImgBtnLeft()
+    {
+        return _imgBtnLeft;
+    }
+
+    public ImageButton getImgBtnRight()
+    {
+        return _imgBtnRight;
     }
 }

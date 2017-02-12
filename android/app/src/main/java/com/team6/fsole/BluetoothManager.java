@@ -1,13 +1,10 @@
 package com.team6.fsole;
 
-import android.app.Activity;
-import android.app.Dialog;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothSocket;
-import android.content.Intent;
-import android.support.v7.app.AlertDialog;
-import android.view.LayoutInflater;
+import android.os.Handler;
+import android.widget.ImageButton;
 
 import java.util.Set;
 
@@ -23,8 +20,10 @@ class BluetoothManager
     private BluetoothAdapter mBluetoothAdapter;
     private Boolean BluetoothOK;
     Set<BluetoothDevice> pairedDevices;
-    private BluetoothSocket LeftSole;
-    private BluetoothSocket RightSole;
+    private BluetoothSocket LeftSoleSocket;
+    private BluetoothSocket RightSoleSocket;
+    private SoleBluetoothService LeftSoleService;
+    private SoleBluetoothService RightSoleService;
 
     BluetoothManager()
     {
@@ -54,27 +53,31 @@ class BluetoothManager
         return BluetoothOK;
     }
 
-    void initiateDeviceConnection(BluetoothDevice device, String tag)
+    void initiateDeviceConnection(BluetoothDevice device, String tag, Handler imgHandler)
     {
-        ConnectThread t = new ConnectThread(this, device, tag);
+        ConnectThread t = new ConnectThread(this, device, tag, imgHandler);
         t.start();
     }
 
-    void setLeftSole(BluetoothSocket leftSole)
+    void setLeftSoleSocket(BluetoothSocket leftSoleSocket)
     {
-        LeftSole = leftSole;
+        LeftSoleSocket = leftSoleSocket;
     }
 
-    void setRightSole(BluetoothSocket rightSole)
+    void setRightSoleSocket(BluetoothSocket rightSoleSocket)
     {
-        RightSole = rightSole;
+        RightSoleSocket = rightSoleSocket;
     }
 
-    void initiateSocketManagement(String tag)
+    void initiateSocketManagement(String tag, Handler handler)
     {
-        if (tag.equals(RIGHT))
+        if (tag.equals(RIGHT) && RightSoleSocket.isConnected())
         {
-
+            RightSoleService = new SoleBluetoothService(RightSoleSocket, handler);
+        }
+        else
+        {
+            LeftSoleService = new SoleBluetoothService(LeftSoleSocket, handler);
         }
     }
 }
