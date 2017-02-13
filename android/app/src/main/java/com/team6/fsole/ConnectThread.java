@@ -67,6 +67,7 @@ class ConnectThread extends Thread
             {
                 Log.e(TAG, "Could not connect the client socket");
                 mmSocket.close();
+                imageHandler.sendEmptyMessage(MessageConstants.CONNECTION_BAD);
 
             }
             catch (IOException closeException) {

@@ -69,15 +69,42 @@ class BluetoothManager
         RightSoleSocket = rightSoleSocket;
     }
 
-    void initiateSocketManagement(String tag, Handler handler)
+    void initiateSocketManagement(String tag, Handler dataHandler)
     {
         if (tag.equals(RIGHT) && RightSoleSocket.isConnected())
         {
-            RightSoleService = new SoleBluetoothService(RightSoleSocket, handler);
+            RightSoleService = new SoleBluetoothService(RightSoleSocket, dataHandler);
+            RightSoleService.getConnectedThread().start();
         }
         else
         {
-            LeftSoleService = new SoleBluetoothService(LeftSoleSocket, handler);
+            LeftSoleService = new SoleBluetoothService(LeftSoleSocket, dataHandler);
+            LeftSoleService.getConnectedThread().start();
+        }
+    }
+
+    void startSession()
+    {
+        if (RightSoleService != null)
+        {
+            RightSoleService.getConnectedThread().write("START\r\n".getBytes());
+        }
+
+        if (LeftSoleService != null)
+        {
+            LeftSoleService.getConnectedThread().write("START\r\n".getBytes());
+        }
+    }
+
+    void endSession()
+    {
+        if (RightSoleService != null)
+        {
+            RightSoleService.getConnectedThread().write("END\r\n".getBytes());
+        }
+        if (LeftSoleService != null)
+        {
+            LeftSoleService.getConnectedThread().write("END\r\n".getBytes());
         }
     }
 }

@@ -3,13 +3,15 @@ package com.team6.fsole;
 import android.bluetooth.BluetoothSocket;
 import android.os.Bundle;
 import android.os.Message;
+import android.os.SystemClock;
 import android.util.Log;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.nio.charset.StandardCharsets;
+
 import android.os.Handler;
-import java.util.logging.LogRecord;
 
 /**
  * Created by Owner on 2/6/2017.
@@ -18,35 +20,29 @@ import java.util.logging.LogRecord;
 class SoleBluetoothService
 {
     private static final String TAG = "SoleBluetoothService";
-    private Handler mHandler; //gets info from Bluetooth service
+    private Handler dataHandler; //gets info from Bluetooth service
 
     private ConnectedThread connectedThread;
 
     // Constants for trasmitting messages between service and UI
     private interface MessageConstants {
-        public static final int MESSAGE_READ = 0;
-        public static final int MESSAGE_WRITE = 1;
-        public static final int MESSAGE_TOAST = 2;
+        public static final int MESSAGE_READ = 100;
+        public static final int MESSAGE_WRITE = 200;
+        public static final int MESSAGE_TOAST = 300;
     }
 
     SoleBluetoothService(BluetoothSocket socket, Handler handler)
     {
-        mHandler = handler;
+        dataHandler = handler;
         connectedThread = new ConnectedThread(socket);
-        connectedThread.run();
     }
 
-    public void write(byte[] bytes)
+    ConnectedThread getConnectedThread()
     {
-        connectedThread.write(bytes);
+        return connectedThread;
     }
 
-    public void cancel()
-    {
-        connectedThread.cancel();
-    }
-
-    private class ConnectedThread extends Thread
+    public class ConnectedThread extends Thread
     {
         private final BluetoothSocket mmSocket;
         private final InputStream mmInStream;
@@ -90,20 +86,30 @@ class SoleBluetoothService
             // Keep listening to input stream until exception
             while (true)
             {
+                write("PING\r\n".getBytes());
+
+
                 try
                 {
                     // Read
                     numBytes = mmInStream.read(mmBuffer);
                     // Send bytes to UI
-                    Message readMsg = mHandler.obtainMessage(
-                            MessageConstants.MESSAGE_READ, numBytes, -1, mmBuffer);
-                    readMsg.sendToTarget();
+                    String s = new String(mmBuffer);
+
+                    Message readMsg = dataHandler.obtainMessage(
+                            MessageConstants.MESSAGE_READ, numBytes, -1, s);
+                    dataHandler.sendMessageDelayed(readMsg, 500);
                 }
                 catch (IOException e)
                 {
                     Log.d(TAG, "Input stream was disconnected", e);
                     break;
                 }
+
+                //Message readMsg = dataHandler.obtainMessage(
+                 //       MessageConstants.MESSAGE_READ, 0, -1, "Successful management loop");
+                //dataHandler.sendMessage(readMsg);
+                SystemClock.sleep(2000);
             }
         }
 
@@ -118,12 +124,12 @@ class SoleBluetoothService
                 Log.e(TAG, "Error occured when sending data", e);
 
                 //Send failure message back to activity
-                Message writeErrorMsg = mHandler.obtainMessage(
+                Message writeErrorMsg = dataHandler.obtainMessage(
                         MessageConstants.MESSAGE_TOAST);
                 Bundle bundle = new Bundle();
                 bundle.putString("toast", "Couldn't send data to the device");
                 writeErrorMsg.setData(bundle);
-                mHandler.sendMessage(writeErrorMsg);
+                dataHandler.sendMessage(writeErrorMsg);
             }
         }
 

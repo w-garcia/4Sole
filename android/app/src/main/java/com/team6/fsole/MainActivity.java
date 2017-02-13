@@ -41,13 +41,26 @@ public class MainActivity extends AppCompatActivity
         }
 
         Button _btnMap = (Button) findViewById(R.id._btnMap);
+        Button _btnSession = (Button) findViewById(R.id._btnSession);
 
         _btnMap.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v)
             {
                 Intent activityChangeIntent = new Intent(MainActivity.this, MapActivity.class);
 
-                MainActivity.this.startActivity(activityChangeIntent);
+                startActivity(activityChangeIntent);
+
+            }
+        });
+
+        _btnSession.setOnClickListener(new View.OnClickListener()
+        {
+            @Override
+            public void onClick(View v)
+            {
+                Intent sessionChangeIntent = new Intent(MainActivity.this, SessionActivity.class);
+
+                startActivity(sessionChangeIntent);
             }
         });
     }
