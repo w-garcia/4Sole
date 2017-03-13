@@ -46,6 +46,7 @@ public class MainActivity extends AppCompatActivity
         _btnMap.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v)
             {
+                //Intent activityChangeIntent = new Intent(MainActivity.this, MapActivity.class);
                 Intent activityChangeIntent = new Intent(MainActivity.this, MapActivity.class);
 
                 startActivity(activityChangeIntent);

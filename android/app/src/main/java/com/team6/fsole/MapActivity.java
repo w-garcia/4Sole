@@ -3,8 +3,11 @@ package com.team6.fsole;
 import android.app.Activity;
 import android.app.Dialog;
 import android.bluetooth.BluetoothDevice;
+import android.content.BroadcastReceiver;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.nfc.Tag;
 import android.os.Handler;
 import android.os.Message;
@@ -36,11 +39,17 @@ import java.util.regex.Pattern;
 
 public class MapActivity extends AppCompatActivity
 {
+    private static String TAG = "MapActivity";
     private FSoleApplication myFSoleApplication;
     private ImageButton _imgBtnLeft;
     private ImageButton _imgBtnRight;
-    static String LEFT = "left";
-    static String RIGHT = "right";
+    private static final long SCAN_PERIOD = 10000;
+
+    static final String DIRECTION = "direction";
+    static final String LEFT = "left";
+    static final String RIGHT = "right";
+    private final String DEVICE = "device";
+    private final Integer DEVICE_PICK = 1;
 
     Pattern dataPattern = Pattern.compile("[^A\\d][0-9]+");
 
@@ -75,8 +84,48 @@ public class MapActivity extends AppCompatActivity
         public static final int MESSAGE_TOAST = 300;
     }
 
-    private Boolean quit = false;
+    // Create a BroadcastReceiver to listen for GATT actions.
+    // Handles various events fired by the Service.
+    // ACTION_GATT_CONNECTED: connected to a GATT server.
+    // ACTION_GATT_DISCONNECTED: disconnected from a GATT server.
+    // ACTION_GATT_SERVICES_DISCOVERED: discovered GATT services.
+    // ACTION_DATA_AVAILABLE: received data from the device. This can be a result of read or notification operations.
+    private final BroadcastReceiver mGATTUpdateReceiver = new BroadcastReceiver()
+    {
+        public void onReceive(Context context, Intent intent)
+        {
+            final String action = intent.getAction();
 
+            if (SoleBluetoothService.ACTION_GATT_CONNECTED.equals(action))
+            {
+                Log.i(TAG, "ACTION_GATT_CONNECTED");
+                //mConnected = true;
+                //updateConnectionState(R.string.connected);
+                //invalidateOptionsMenu();
+            }
+            else if (SoleBluetoothService.ACTION_GATT_DISCONNECTED.equals(action))
+            {
+                Log.i(TAG, "ACTION_GATT_DISCONNECTED");
+                //mConnected = false;
+                //updateConnectionState(R.string.disconnected);
+                //invalidateOptionsMenu();
+                //clearUI();
+            }
+            else if (SoleBluetoothService.ACTION_GATT_SERVICES_DISCOVERED.equals(action))
+            {
+                Log.i(TAG, "ACTION_GATT_SERVICES_DISCOVERED");
+                // Show all the supported services and characteristics on the
+                // user interface.
+                //displayGattServices(mBluetoothLeService.getSupportedGattServices());
+            }
+            else if (SoleBluetoothService.ACTION_DATA_AVAILABLE.equals(action))
+            {
+                Log.i(TAG, "ACTION_DATA_AVAILABLE");
+                //displayData(intent.getStringExtra(BluetoothLeService.EXTRA_DATA));
+            }
+
+        }
+    };
 
     private static class LeftImageHandler extends Handler
     {
@@ -132,7 +181,7 @@ public class MapActivity extends AppCompatActivity
             {
                 _imgBtnLeft.setImageResource(R.drawable.foot_outline_l);
                 final BluetoothManager mBluetoothManager = myFSoleApplication.getmBluetoothManager();
-                mBluetoothManager.initiateSocketManagement(LEFT, leftDataHandler);
+                //mBluetoothManager.initiateSocketManagement(LEFT, leftDataHandler);
 
                 _txt0L.setVisibility(View.VISIBLE);
                 _txt1L.setVisibility(View.VISIBLE);
@@ -143,7 +192,7 @@ public class MapActivity extends AppCompatActivity
             {
                 _imgBtnRight.setImageResource(R.drawable.foot_outline_r);
                 final BluetoothManager mBluetoothManager = myFSoleApplication.getmBluetoothManager();
-                mBluetoothManager.initiateSocketManagement(RIGHT, rightDataHandler);
+                //mBluetoothManager.initiateSocketManagement(RIGHT, rightDataHandler);
 
                 _txt0R.setVisibility(View.VISIBLE);
                 _txt1R.setVisibility(View.VISIBLE);
@@ -264,29 +313,9 @@ public class MapActivity extends AppCompatActivity
             @Override
             public void onClick(View v)
             {
-                if (!myFSoleApplication.getLeftSoleConnected())
-                {
-                    ArrayList<BluetoothDevice> pDevices = new ArrayList<BluetoothDevice>();
-                    pDevices.addAll(mBluetoothManager.getPairedDevices());
-
-                    AlertDialog.Builder alertDialog = new AlertDialog.Builder(MapActivity.this);
-                    alertDialog.setTitle("Paired Devices");
-
-                    final ArrayAdapter<BluetoothDevice> arrayAdapter = new ArrayAdapter<>(getApplicationContext(), android.R.layout.simple_list_item_1, pDevices);
-
-                    alertDialog.setAdapter(arrayAdapter, new DialogInterface.OnClickListener()
-                    {
-                        @Override
-                        public void onClick(DialogInterface dialog, int which)
-                        {
-                            BluetoothDevice pDevice = arrayAdapter.getItem(which);
-                            //Connect here
-                            mBluetoothManager.initiateDeviceConnection(pDevice, LEFT, leftImageHandler);
-                        }
-                    });
-
-                    alertDialog.show();
-                }
+                Intent pickDeviceIntent = new Intent(MapActivity.this, DeviceScanActivity.class);
+                pickDeviceIntent.putExtra(DIRECTION, LEFT);
+                startActivityForResult(pickDeviceIntent, DEVICE_PICK);
             }
         });
 
@@ -295,33 +324,56 @@ public class MapActivity extends AppCompatActivity
             @Override
             public void onClick(View v)
             {
-                if (!myFSoleApplication.getRightSoleConnected())
-                {
-                    ArrayList<BluetoothDevice> pDevices = new ArrayList<BluetoothDevice>();
-                    pDevices.addAll(mBluetoothManager.getPairedDevices());
-
-                    AlertDialog.Builder alertDialog = new AlertDialog.Builder(MapActivity.this);
-                    alertDialog.setTitle("Paired Devices");
-
-                    final ArrayAdapter<BluetoothDevice> arrayAdapter = new ArrayAdapter<>(getApplicationContext(), android.R.layout.simple_list_item_1, pDevices);
-
-                    alertDialog.setAdapter(arrayAdapter, new DialogInterface.OnClickListener()
-                    {
-                        @Override
-                        public void onClick(DialogInterface dialog, int which)
-                        {
-                            BluetoothDevice pDevice = arrayAdapter.getItem(which);
-                            //Connect here
-                            mBluetoothManager.initiateDeviceConnection(pDevice, RIGHT, rightImageHandler);
-                        }
-                    });
-
-                    alertDialog.show();
-                }
+                Intent pickDeviceIntent = new Intent(MapActivity.this, DeviceScanActivity.class);
+                pickDeviceIntent.putExtra(DIRECTION, RIGHT);
+                startActivityForResult(pickDeviceIntent, DEVICE_PICK);
             }
         });
+
+        // ACTION_GATT_CONNECTED: connected to a GATT server.
+        // ACTION_GATT_DISCONNECTED: disconnected from a GATT server.
+        // ACTION_GATT_SERVICES_DISCOVERED: discovered GATT services.
+        // ACTION_DATA_AVAILABLE: received data from the device. This can be a result of read or notification operations.
+        IntentFilter filter = new IntentFilter();
+        filter.addAction(SoleBluetoothService.ACTION_GATT_CONNECTED);
+        filter.addAction(SoleBluetoothService.ACTION_GATT_DISCONNECTED);
+        filter.addAction(SoleBluetoothService.ACTION_GATT_SERVICES_DISCOVERED);
+        filter.addAction(SoleBluetoothService.ACTION_DATA_AVAILABLE);
+
+        registerReceiver(mGATTUpdateReceiver, filter);
     }
 
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data)
+    {
+        if (requestCode == DEVICE_PICK)
+        {
+            if (resultCode != RESULT_OK)
+            {
+                return;
+            }
+
+            String dir = data.getStringExtra(DIRECTION);
+            BluetoothDevice device = data.getParcelableExtra(DEVICE);
+            final BluetoothManager mBluetoothManager = myFSoleApplication.getmBluetoothManager();
+
+            switch(dir)
+            {
+                case LEFT:
+                    Log.v("MapActivity", "Connecting to: " + device.getName());
+                    // start connection here
+                    mBluetoothManager.initiateDeviceConnection(device, LEFT);
+                    break;
+                case RIGHT:
+                    Log.v("MapActivity", "Connecting to: " + device.getName());
+                    // start connection here
+                    mBluetoothManager.initiateDeviceConnection(device, RIGHT);
+                    break;
+            }
+
+        }
+    }
 
     @Override
     protected void onRestoreInstanceState(Bundle savedInstanceState)
@@ -357,10 +409,17 @@ public class MapActivity extends AppCompatActivity
 
 
     @Override
+    protected void onDestroy()
+    {
+        super.onDestroy();
+
+        unregisterReceiver(mGATTUpdateReceiver);
+    }
+
+    @Override
     public void onBackPressed()
     {
         super.onBackPressed();
-        quit = true;
         //Intent mainIntent = new Intent(this, MainActivity.class);
         //#startActivity(mainIntent);
     }
@@ -388,15 +447,5 @@ public class MapActivity extends AppCompatActivity
         }
 
         return super.onOptionsItemSelected(item);
-    }
-
-    public ImageButton getImgBtnLeft()
-    {
-        return _imgBtnLeft;
-    }
-
-    public ImageButton getImgBtnRight()
-    {
-        return _imgBtnRight;
     }
 }

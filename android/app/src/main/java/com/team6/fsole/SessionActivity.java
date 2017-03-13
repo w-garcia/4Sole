@@ -61,7 +61,7 @@ public class SessionActivity extends AppCompatActivity
             public void onClick(View v)
             {
                 countDownTimer.start();
-                _mBlueToothManager.startSession();
+                //_mBlueToothManager.startSession();
             }
         });
 
@@ -78,6 +78,6 @@ public class SessionActivity extends AppCompatActivity
     private void stopSession()
     {
         countDownTimer.cancel();
-        _mBlueToothManager.endSession();
+        //_mBlueToothManager.endSession();
     }
 }

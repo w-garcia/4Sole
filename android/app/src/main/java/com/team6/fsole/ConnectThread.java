@@ -77,7 +77,7 @@ class ConnectThread extends Thread
             return;
 
         }
-
+/*
         // Havr connected socket here.
         if (sole_tag.equals(RIGHT))
         {
@@ -90,7 +90,7 @@ class ConnectThread extends Thread
             mManager.setLeftSoleSocket(mmSocket);
             imageHandler.sendEmptyMessage(MessageConstants.CONNECTION_GOOD);
         }
-
+*/
     }
 
     public void cancel()

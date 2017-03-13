@@ -5,10 +5,12 @@
 ** Rui Santos: http://randomnerdtutorials.wordpress.com
 */
 int ground = 10;
-int echo = 9;
-int trigPin = 8;
-int vcc = 7;
 long duration, cm, inches;
+
+int motor1 = 6;
+int motor2 = 7;
+int motor3 = 8;
+int motor4 = 9;
 
 int state = 0;
 int flag = 0;        // make sure that you return the state only once
@@ -19,13 +21,16 @@ void setup()
 {
     // sets the pins as outputs:
     pinMode(ground, OUTPUT);
-    pinMode(vcc, OUTPUT);
-    pinMode(trigPin, OUTPUT);
+    
+    pinMode(motor1, OUTPUT);
+    pinMode(motor2, OUTPUT);
+    pinMode(motor3, OUTPUT);
+    pinMode(motor4, OUTPUT);
+    
     digitalWrite(ground, LOW);
-    digitalWrite(vcc, HIGH);
     
     inputString.reserve(50);
-    Serial.begin(9600); // Default connection rate for my BT module
+    Serial.begin(115200); // Default connection rate for my BT module
 }
 
 void loop() 
@@ -39,8 +44,23 @@ void loop()
     {
         if (inputString == "PING")
         {
-          //Serial.println(ping());
           read_pressure();
+        }
+        else if (inputString == "START")
+        {
+          digitalWrite(motor1, HIGH);
+          digitalWrite(motor2, HIGH);
+          digitalWrite(motor3, HIGH);
+          digitalWrite(motor4, HIGH);
+          Serial.println("SESSION ON");
+        }
+        else if (inputString == "END")
+        {
+          digitalWrite(motor1, LOW);
+          digitalWrite(motor2, LOW);
+          digitalWrite(motor3, LOW);
+          digitalWrite(motor4, LOW);
+          Serial.println("SESSION OFF");
         }
       inputString = "";
     }
@@ -49,25 +69,4 @@ void loop()
       inputString += inChar;
     }  
   }
-}
-
-long ping()
-{
-  digitalWrite(trigPin, LOW);
-  delayMicroseconds(5);
-  digitalWrite(trigPin, HIGH);
-  delayMicroseconds(10);
-  digitalWrite(trigPin, LOW);
- 
-  // Read the signal from the sensor: a HIGH pulse whose
-  // duration is the time (in microseconds) from the sending
-  // of the ping to the reception of its echo off of an object.
-  pinMode(echo, INPUT);
-  duration = pulseIn(echo, HIGH);
- 
-  // convert the time into a distance
-  cm = (duration/2) / 29.1;
-  inches = (duration/2) / 74; 
-  
-  return cm;
 }
