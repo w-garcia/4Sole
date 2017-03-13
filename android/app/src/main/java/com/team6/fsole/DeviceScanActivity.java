@@ -62,7 +62,7 @@ public class DeviceScanActivity extends AppCompatActivity
                 finish();
             }
         });
-        mLeDeviceListAdapter = new ArrayAdapter<>(getApplicationContext(), android.R.layout.simple_list_item_1, _foundDevices);
+        mLeDeviceListAdapter = new BluetoothListAdapter(getApplicationContext(), R.layout.bluetooth_list_item, _foundDevices);
 
         lvLEDevices.setAdapter(mLeDeviceListAdapter);
 
