@@ -31,8 +31,8 @@ class BluetoothManager
     private List<BluetoothDevice> foundDevices;
     //private BluetoothSocket LeftSoleSocket;
    // private BluetoothSocket RightSoleSocket;
-    private SoleBluetoothService LeftSoleService;
-    private SoleBluetoothService RightSoleService;
+    private LeftSoleBluetoothService LeftSoleService;
+    private RightSoleBluetoothService RightSoleService;
 
     BluetoothManager()
     {
@@ -78,12 +78,12 @@ class BluetoothManager
         // Patch possible leaks
         if (tag.equals(RIGHT))
         {
-            LeftSoleService = new SoleBluetoothService(device);
+            LeftSoleService = new LeftSoleBluetoothService();
             return LeftSoleService;
         }
         else
         {
-            RightSoleService = new SoleBluetoothService(device);
+            RightSoleService = new RightSoleBluetoothService();
             return RightSoleService;
         }
     }

@@ -139,9 +139,9 @@ public class SoleBluetoothService extends Service
         }
     };
 
-    public SoleBluetoothService(BluetoothDevice device)
+    public SoleBluetoothService()
     {
-        mBluetoothDevice = device;
+
     }
 
 
@@ -151,9 +151,16 @@ public class SoleBluetoothService extends Service
         super.onStart(intent, startId);
         Log.w(TAG, "Bluetooth service started!");
         Bundle extras = intent.getExtras();
-
+        BluetoothDevice getDevice = (BluetoothDevice) extras.get(DEVICE);
+        mBluetoothDevice = getDevice;
 
         mBluetoothGatt = mBluetoothDevice.connectGatt(this, false, mGattCallback);
+    }
+
+    @Override
+    public void onCreate() {
+        
+        super.onCreate();
     }
 
     @Override

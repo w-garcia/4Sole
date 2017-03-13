@@ -363,12 +363,18 @@ public class MapActivity extends AppCompatActivity
                 case LEFT:
                     Log.v("MapActivity", "Connecting to: " + device.getName());
                     // start connection here
-                    mBluetoothManager.initiateDeviceConnection(device, LEFT);
+                    //mBluetoothManager.initiateDeviceConnection(device, LEFT);
+                    Intent leftIntent = new Intent(this, LeftSoleBluetoothService.class);
+                    leftIntent.putExtra(DEVICE, device);
+                    startService(leftIntent);
                     break;
                 case RIGHT:
                     Log.v("MapActivity", "Connecting to: " + device.getName());
                     // start connection here
-                    mBluetoothManager.initiateDeviceConnection(device, RIGHT);
+                    //mBluetoothManager.initiateDeviceConnection(device, RIGHT);
+                    Intent rightIntent = new Intent(this, RightSoleBluetoothService.class);
+                    rightIntent.putExtra(DEVICE, device);
+                    startService(rightIntent);
                     break;
             }
 
