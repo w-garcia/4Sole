@@ -43,13 +43,14 @@ public class MapActivity extends AppCompatActivity
     private FSoleApplication myFSoleApplication;
     private ImageButton _imgBtnLeft;
     private ImageButton _imgBtnRight;
-    private static final long SCAN_PERIOD = 10000;
+    private Boolean leftBtnActive = false;
+    private Boolean rightBtnActive = false;
 
     static final String DIRECTION = "direction";
     static final String LEFT = "left";
     static final String RIGHT = "right";
-    private final String DEVICE = "device";
-    private final Integer DEVICE_PICK = 1;
+    static final String DEVICE = "device";
+    static final Integer DEVICE_PICK = 1;
 
     Pattern dataPattern = Pattern.compile("[^A\\d][0-9]+");
 
@@ -67,9 +68,7 @@ public class MapActivity extends AppCompatActivity
     private final String RIGHT_IMG_HANDLER = "rightImgHandler";
     private final String LEFT_DATA_HANDLER = "leftDataHandler";
     private final String RIGHT_DATA_HANDLER = "rightDataHandler";
-
-    private final LeftImageHandler leftImageHandler = new LeftImageHandler(this);
-    private final RightImageHandler rightImageHandler = new RightImageHandler(this);
+    private static final long SCAN_PERIOD = 10000;
 
     private final LeftDataHandler leftDataHandler = new LeftDataHandler(this);
     private final RightDataHandler rightDataHandler = new RightDataHandler(this);
@@ -95,6 +94,8 @@ public class MapActivity extends AppCompatActivity
         public void onReceive(Context context, Intent intent)
         {
             final String action = intent.getAction();
+            final Bundle extras = intent.getExtras();
+            final String direction = (String) extras.get(DIRECTION);
 
             if (SoleBluetoothService.ACTION_GATT_CONNECTED.equals(action))
             {
@@ -102,6 +103,7 @@ public class MapActivity extends AppCompatActivity
                 //mConnected = true;
                 //updateConnectionState(R.string.connected);
                 //invalidateOptionsMenu();
+                onConnectionMessageRecieved(direction);
             }
             else if (SoleBluetoothService.ACTION_GATT_DISCONNECTED.equals(action))
             {
@@ -110,6 +112,7 @@ public class MapActivity extends AppCompatActivity
                 //updateConnectionState(R.string.disconnected);
                 //invalidateOptionsMenu();
                 //clearUI();
+                onDisconnectMessageRecieved(direction);
             }
             else if (SoleBluetoothService.ACTION_GATT_SERVICES_DISCOVERED.equals(action))
             {
@@ -123,86 +126,63 @@ public class MapActivity extends AppCompatActivity
                 Log.i(TAG, "ACTION_DATA_AVAILABLE");
                 //displayData(intent.getStringExtra(BluetoothLeService.EXTRA_DATA));
             }
+            //else
+            //{
+            //    Toast.makeText(MapActivity.this, "Failed to create connection.", Toast.LENGTH_SHORT).show();
+            //}
 
         }
     };
 
-    private static class LeftImageHandler extends Handler
+    private void onDisconnectMessageRecieved(String tag)
     {
-        private final WeakReference<MapActivity> mapActivityWeakReference;
-
-        public LeftImageHandler(MapActivity activity)
+        if (tag.equals(LEFT))
         {
-            mapActivityWeakReference = new WeakReference<>(activity);
+            _imgBtnLeft.setImageResource(R.mipmap.plus);
+
+            _txt0L.setVisibility(View.INVISIBLE);
+            _txt1L.setVisibility(View.INVISIBLE);
+            _txt2L.setVisibility(View.INVISIBLE);
+            _txt3L.setVisibility(View.INVISIBLE);
+            leftBtnActive = false;
         }
-
-        @Override
-        public void handleMessage(Message msg)
+        else
         {
-            MapActivity mapActivity = mapActivityWeakReference.get();
+            _imgBtnRight.setImageResource(R.mipmap.plus);
 
-            if (mapActivity == null)
-            {
-                return;
-            }
-
-            mapActivity.onConnectionMessageRecieved(msg, "left");
+            _txt0R.setVisibility(View.INVISIBLE);
+            _txt1R.setVisibility(View.INVISIBLE);
+            _txt2R.setVisibility(View.INVISIBLE);
+            _txt3R.setVisibility(View.INVISIBLE);
+            rightBtnActive = false;
         }
     }
 
-    private static class RightImageHandler extends Handler
+    public void onConnectionMessageRecieved(String tag)
     {
-        private final WeakReference<MapActivity> mapActivityWeakReference;
-
-        public RightImageHandler(MapActivity activity)
+        if (tag.equals(LEFT))
         {
-            mapActivityWeakReference = new WeakReference<>(activity);
+            _imgBtnLeft.setImageResource(R.drawable.foot_outline_l);
+            final BluetoothManager mBluetoothManager = myFSoleApplication.getmBluetoothManager();
+            //mBluetoothManager.initiateSocketManagement(LEFT, leftDataHandler);
+
+            _txt0L.setVisibility(View.VISIBLE);
+            _txt1L.setVisibility(View.VISIBLE);
+            _txt2L.setVisibility(View.VISIBLE);
+            _txt3L.setVisibility(View.VISIBLE);
+            leftBtnActive = true;
         }
-
-        @Override
-        public void handleMessage(Message msg)
+        else
         {
-            MapActivity mapActivity = mapActivityWeakReference.get();
+            _imgBtnRight.setImageResource(R.drawable.foot_outline_r);
+            final BluetoothManager mBluetoothManager = myFSoleApplication.getmBluetoothManager();
+            //mBluetoothManager.initiateSocketManagement(RIGHT, rightDataHandler);
 
-            if (mapActivity == null)
-            {
-                return;
-            }
-
-            mapActivity.onConnectionMessageRecieved(msg, "right");
-        }
-    }
-
-    public void onConnectionMessageRecieved(Message msg, String tag)
-    {
-        if (msg.what == MessageConstants.CONNECTION_GOOD)
-        {
-            if (tag.equals(LEFT))
-            {
-                _imgBtnLeft.setImageResource(R.drawable.foot_outline_l);
-                final BluetoothManager mBluetoothManager = myFSoleApplication.getmBluetoothManager();
-                //mBluetoothManager.initiateSocketManagement(LEFT, leftDataHandler);
-
-                _txt0L.setVisibility(View.VISIBLE);
-                _txt1L.setVisibility(View.VISIBLE);
-                _txt2L.setVisibility(View.VISIBLE);
-                _txt3L.setVisibility(View.VISIBLE);
-            }
-            else
-            {
-                _imgBtnRight.setImageResource(R.drawable.foot_outline_r);
-                final BluetoothManager mBluetoothManager = myFSoleApplication.getmBluetoothManager();
-                //mBluetoothManager.initiateSocketManagement(RIGHT, rightDataHandler);
-
-                _txt0R.setVisibility(View.VISIBLE);
-                _txt1R.setVisibility(View.VISIBLE);
-                _txt2R.setVisibility(View.VISIBLE);
-                _txt3R.setVisibility(View.VISIBLE);
-            }
-        }
-        else if (msg.what == MessageConstants.CONNECTION_BAD)
-        {
-            Toast.makeText(MapActivity.this, "Failed to create connection.", Toast.LENGTH_SHORT).show();
+            _txt0R.setVisibility(View.VISIBLE);
+            _txt1R.setVisibility(View.VISIBLE);
+            _txt2R.setVisibility(View.VISIBLE);
+            _txt3R.setVisibility(View.VISIBLE);
+            rightBtnActive = true;
         }
     }
 
@@ -313,9 +293,18 @@ public class MapActivity extends AppCompatActivity
             @Override
             public void onClick(View v)
             {
-                Intent pickDeviceIntent = new Intent(MapActivity.this, DeviceScanActivity.class);
-                pickDeviceIntent.putExtra(DIRECTION, LEFT);
-                startActivityForResult(pickDeviceIntent, DEVICE_PICK);
+                if (!leftBtnActive)
+                {
+                    Intent pickDeviceIntent = new Intent(MapActivity.this, DeviceScanActivity.class);
+                    pickDeviceIntent.putExtra(DIRECTION, LEFT);
+                    startActivityForResult(pickDeviceIntent, DEVICE_PICK);
+                }
+                else
+                {
+                    //TODO: Open dialog instead
+                    stopService(new Intent(MapActivity.this, LeftSoleBluetoothService.class));
+                }
+
             }
         });
 
@@ -324,9 +313,18 @@ public class MapActivity extends AppCompatActivity
             @Override
             public void onClick(View v)
             {
-                Intent pickDeviceIntent = new Intent(MapActivity.this, DeviceScanActivity.class);
-                pickDeviceIntent.putExtra(DIRECTION, RIGHT);
-                startActivityForResult(pickDeviceIntent, DEVICE_PICK);
+                if (!rightBtnActive)
+                {
+                    Intent pickDeviceIntent = new Intent(MapActivity.this, DeviceScanActivity.class);
+                    pickDeviceIntent.putExtra(DIRECTION, RIGHT);
+                    startActivityForResult(pickDeviceIntent, DEVICE_PICK);
+                }
+                else
+                {
+                    //TODO: Open dialog instead
+                    stopService(new Intent(MapActivity.this, RightSoleBluetoothService.class));
+                }
+
             }
         });
 
@@ -366,6 +364,7 @@ public class MapActivity extends AppCompatActivity
                     //mBluetoothManager.initiateDeviceConnection(device, LEFT);
                     Intent leftIntent = new Intent(this, LeftSoleBluetoothService.class);
                     leftIntent.putExtra(DEVICE, device);
+                    leftIntent.putExtra(DIRECTION, LEFT);
                     startService(leftIntent);
                     break;
                 case RIGHT:
@@ -374,6 +373,7 @@ public class MapActivity extends AppCompatActivity
                     //mBluetoothManager.initiateDeviceConnection(device, RIGHT);
                     Intent rightIntent = new Intent(this, RightSoleBluetoothService.class);
                     rightIntent.putExtra(DEVICE, device);
+                    rightIntent.putExtra(DIRECTION, RIGHT);
                     startService(rightIntent);
                     break;
             }
@@ -412,7 +412,6 @@ public class MapActivity extends AppCompatActivity
         super.onStop();
 
     }
-
 
     @Override
     protected void onDestroy()

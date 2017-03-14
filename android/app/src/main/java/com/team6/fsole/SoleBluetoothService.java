@@ -37,6 +37,7 @@ public class SoleBluetoothService extends Service
     private BluetoothAdapter mBluetoothAdapter;
     private String mBluetoothDeviceAddress;
     private BluetoothGatt mBluetoothGatt;
+    private String mySoleDirection;
 
     private static final int STATE_DISCONNECTED = 0;
     private static final int STATE_CONNECTING = 1;
@@ -46,7 +47,11 @@ public class SoleBluetoothService extends Service
 
     private int mConnectionState = STATE_DISCONNECTED;
 
-    private final String DEVICE = "device";
+    static final String DIRECTION = "direction";
+    static final String LEFT = "left";
+    static final String RIGHT = "right";
+    static final String DEVICE = "device";
+
     public final static String ACTION_GATT_CONNECTED =
             "com.example.bluetooth.le.ACTION_GATT_CONNECTED";
     public final static String ACTION_GATT_DISCONNECTED =
@@ -59,6 +64,7 @@ public class SoleBluetoothService extends Service
             "com.example.bluetooth.le.EXTRA_DATA";
 
     public UUID UUID_SOLE;
+    private Boolean readyToDestroy = false;
 
     private final BluetoothGattCallback mGattCallback = new BluetoothGattCallback()
     {
@@ -81,6 +87,11 @@ public class SoleBluetoothService extends Service
                 mConnectionState = STATE_DISCONNECTED;
                 Log.i(TAG, "Disconnected from GATT server.");
                 broadcastUpdate(intentAction);
+
+                if (readyToDestroy)
+                {
+                    close();
+                }
             }
         }
 
@@ -115,6 +126,7 @@ public class SoleBluetoothService extends Service
         private void broadcastUpdate(final String action)
         {
             final Intent intent = new Intent(action);
+            intent.putExtra(DIRECTION, mySoleDirection);
 
             sendBroadcast(intent);
         }
@@ -122,6 +134,7 @@ public class SoleBluetoothService extends Service
         private void broadcastUpdate(final String action, final BluetoothGattCharacteristic characteristic)
         {
             final Intent intent = new Intent(action);
+            intent.putExtra(DIRECTION, mySoleDirection);
 
             // Writes the data formatted in HEX.
             final byte[] data = characteristic.getValue();
@@ -144,28 +157,21 @@ public class SoleBluetoothService extends Service
 
     }
 
-
     @Override
-    public void onStart(Intent intent, int startId)
+    public void onCreate()
     {
-        super.onStart(intent, startId);
-        Log.w(TAG, "Bluetooth service started!");
-        Bundle extras = intent.getExtras();
-        BluetoothDevice getDevice = (BluetoothDevice) extras.get(DEVICE);
-        mBluetoothDevice = getDevice;
-
-        mBluetoothGatt = mBluetoothDevice.connectGatt(this, false, mGattCallback);
-    }
-
-    @Override
-    public void onCreate() {
-        
         super.onCreate();
     }
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId)
     {
+        Log.w(TAG, "Bluetooth service started!");
+        Bundle extras = intent.getExtras();
+        mBluetoothDevice = (BluetoothDevice) extras.get(DEVICE);
+        mySoleDirection = (String) extras.get(DIRECTION);
+
+        mBluetoothGatt = mBluetoothDevice.connectGatt(this, false, mGattCallback);
         return super.onStartCommand(intent, flags, startId);
     }
 
@@ -174,5 +180,26 @@ public class SoleBluetoothService extends Service
     public IBinder onBind(Intent intent)
     {
         return null;
+    }
+
+
+    @Override
+    public void onDestroy()
+    {
+        // Let device disconnect, which will trigger callback and call close()
+        readyToDestroy = true;
+        mBluetoothGatt.disconnect();
+    }
+
+    public void close()
+    {
+        if (mBluetoothGatt != null)
+        {
+            mBluetoothGatt.close();
+            mBluetoothGatt = null;
+        }
+
+        Log.v(TAG, "Service destroyed!");
+        super.onDestroy();
     }
 }

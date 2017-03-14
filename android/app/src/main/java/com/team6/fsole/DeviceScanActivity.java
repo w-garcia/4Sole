@@ -103,6 +103,7 @@ public class DeviceScanActivity extends AppCompatActivity
 
             mScanning = true;
             mBluetoothAdapter.startLeScan(mLEScanCallback);
+            mLeDeviceListAdapter.clear();
         }
         else
         {

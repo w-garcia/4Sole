@@ -40,8 +40,11 @@
             android:theme="@style/DialogTheme">
         </activity>
 
-        <service android:name=".SoleBluetoothService"
-                 android:label="Sole BTService">
+        <service android:name=".LeftSoleBluetoothService"
+                 android:label="LeftSole BTService">
+        </service>
+        <service android:name=".RightSoleBluetoothService"
+                 android:label="RightSole BTService">
         </service>
     </application>
 
