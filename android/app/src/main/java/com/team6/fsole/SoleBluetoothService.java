@@ -6,6 +6,7 @@ import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothGatt;
 import android.bluetooth.BluetoothGattCallback;
 import android.bluetooth.BluetoothGattCharacteristic;
+import android.bluetooth.BluetoothGattService;
 import android.bluetooth.BluetoothProfile;
 import android.bluetooth.BluetoothSocket;
 import android.content.BroadcastReceiver;
@@ -21,6 +22,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 
 import android.os.Handler;
@@ -101,6 +104,7 @@ public class SoleBluetoothService extends Service
             if (status == BluetoothGatt.GATT_SUCCESS)
             {
                 broadcastUpdate(ACTION_GATT_SERVICES_DISCOVERED);
+
             }
             else
             {
@@ -155,6 +159,12 @@ public class SoleBluetoothService extends Service
     public SoleBluetoothService()
     {
 
+    }
+
+    List<BluetoothGattService> getSupportedGattServices()
+    {
+        List<BluetoothGattService> result = new ArrayList<>();
+        return result;
     }
 
     @Override

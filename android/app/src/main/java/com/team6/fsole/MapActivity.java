@@ -3,6 +3,7 @@ package com.team6.fsole;
 import android.app.Activity;
 import android.app.Dialog;
 import android.bluetooth.BluetoothDevice;
+import android.bluetooth.BluetoothGattService;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -32,6 +33,7 @@ import java.lang.ref.WeakReference;
 import java.lang.reflect.Array;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Locale;
 import java.util.Set;
 import java.util.regex.Matcher;
@@ -120,9 +122,12 @@ public class MapActivity extends AppCompatActivity
                 // Show all the supported services and characteristics on the
                 // user interface.
                 //displayGattServices(mBluetoothLeService.getSupportedGattServices());
+
+
             }
             else if (SoleBluetoothService.ACTION_DATA_AVAILABLE.equals(action))
             {
+                // Data received from BLE device
                 Log.i(TAG, "ACTION_DATA_AVAILABLE");
                 //displayData(intent.getStringExtra(BluetoothLeService.EXTRA_DATA));
             }
@@ -186,6 +191,13 @@ public class MapActivity extends AppCompatActivity
         }
     }
 
+    private void logGattServices(List<BluetoothGattService> gattServices)
+    {
+        for (BluetoothGattService i : gattServices)
+        {
+            Log.i(TAG, "Available service:" + i.toString());
+        }
+    }
 
     private static class LeftDataHandler extends Handler
     {
@@ -365,7 +377,9 @@ public class MapActivity extends AppCompatActivity
                     Intent leftIntent = new Intent(this, LeftSoleBluetoothService.class);
                     leftIntent.putExtra(DEVICE, device);
                     leftIntent.putExtra(DIRECTION, LEFT);
-                    startService(leftIntent);
+                    // Bind service to BluetoothManager
+
+                    //startService(leftIntent);
                     break;
                 case RIGHT:
                     Log.v("MapActivity", "Connecting to: " + device.getName());
