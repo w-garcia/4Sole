@@ -11,21 +11,17 @@ import android.widget.TextView;
 
 import java.util.Locale;
 
-public class SessionActivity extends AppCompatActivity
+public class SessionActivity extends BLEBoundActivity
 {
 
     private TextView _chronometer;
     private CountDownTimer countDownTimer;
-    private BluetoothManager _mBlueToothManager;
 
     @Override
     protected void onCreate(Bundle savedInstanceState)
     {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_session);
-
-        FSoleApplication myApp = (FSoleApplication) getApplication();
-        _mBlueToothManager = myApp.getmBluetoothManager();
 
         Button _startBtn = (Button) findViewById(R.id._btnStart);
         Button _endBtn = (Button) findViewById(R.id._btnEnd);

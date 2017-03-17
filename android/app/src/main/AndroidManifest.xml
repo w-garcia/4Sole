@@ -46,6 +46,9 @@
         <service android:name=".RightSoleBluetoothService"
                  android:label="RightSole BTService">
         </service>
+        <service android:name=".BluetoothManager"
+                 android:label="Bluetooth Manager">
+        </service>
     </application>
 
 </manifest>

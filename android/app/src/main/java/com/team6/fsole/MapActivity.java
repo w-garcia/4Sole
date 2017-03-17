@@ -5,12 +5,15 @@ import android.app.Dialog;
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothGattService;
 import android.content.BroadcastReceiver;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.ServiceConnection;
 import android.nfc.Tag;
 import android.os.Handler;
+import android.os.IBinder;
 import android.os.Message;
 import android.support.v4.util.SparseArrayCompat;
 import android.support.v7.app.AlertDialog;
@@ -39,10 +42,12 @@ import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-public class MapActivity extends AppCompatActivity
+import com.team6.fsole.BluetoothManager.BluetoothManagerBinder;
+
+public class MapActivity extends BLEBoundActivity
 {
-    private static String TAG = "MapActivity";
-    private FSoleApplication myFSoleApplication;
+    static final String TAG = "MapActivity";
+
     private ImageButton _imgBtnLeft;
     private ImageButton _imgBtnRight;
     private Boolean leftBtnActive = false;
@@ -85,6 +90,7 @@ public class MapActivity extends AppCompatActivity
         public static final int MESSAGE_TOAST = 300;
     }
 
+    // BEGIN mGATTUpdateReceiver ----------------------------------------------------->
     // Create a BroadcastReceiver to listen for GATT actions.
     // Handles various events fired by the Service.
     // ACTION_GATT_CONNECTED: connected to a GATT server.
@@ -102,34 +108,17 @@ public class MapActivity extends AppCompatActivity
             if (SoleBluetoothService.ACTION_GATT_CONNECTED.equals(action))
             {
                 Log.i(TAG, "ACTION_GATT_CONNECTED");
-                //mConnected = true;
-                //updateConnectionState(R.string.connected);
-                //invalidateOptionsMenu();
                 onConnectionMessageRecieved(direction);
             }
             else if (SoleBluetoothService.ACTION_GATT_DISCONNECTED.equals(action))
             {
                 Log.i(TAG, "ACTION_GATT_DISCONNECTED");
-                //mConnected = false;
-                //updateConnectionState(R.string.disconnected);
-                //invalidateOptionsMenu();
-                //clearUI();
                 onDisconnectMessageRecieved(direction);
-            }
-            else if (SoleBluetoothService.ACTION_GATT_SERVICES_DISCOVERED.equals(action))
-            {
-                Log.i(TAG, "ACTION_GATT_SERVICES_DISCOVERED");
-                // Show all the supported services and characteristics on the
-                // user interface.
-                //displayGattServices(mBluetoothLeService.getSupportedGattServices());
-
-
             }
             else if (SoleBluetoothService.ACTION_DATA_AVAILABLE.equals(action))
             {
                 // Data received from BLE device
                 Log.i(TAG, "ACTION_DATA_AVAILABLE");
-                //displayData(intent.getStringExtra(BluetoothLeService.EXTRA_DATA));
             }
             //else
             //{
@@ -138,6 +127,7 @@ public class MapActivity extends AppCompatActivity
 
         }
     };
+    // END mGATTUpdateReceiver <-----------------------------------------------------
 
     private void onDisconnectMessageRecieved(String tag)
     {
@@ -168,7 +158,7 @@ public class MapActivity extends AppCompatActivity
         if (tag.equals(LEFT))
         {
             _imgBtnLeft.setImageResource(R.drawable.foot_outline_l);
-            final BluetoothManager mBluetoothManager = myFSoleApplication.getmBluetoothManager();
+            //final BluetoothManager mBluetoothManager = myFSoleApplication.getmBluetoothManager();
             //mBluetoothManager.initiateSocketManagement(LEFT, leftDataHandler);
 
             _txt0L.setVisibility(View.VISIBLE);
@@ -180,7 +170,7 @@ public class MapActivity extends AppCompatActivity
         else
         {
             _imgBtnRight.setImageResource(R.drawable.foot_outline_r);
-            final BluetoothManager mBluetoothManager = myFSoleApplication.getmBluetoothManager();
+            //final BluetoothManager mBluetoothManager = myFSoleApplication.getmBluetoothManager();
             //mBluetoothManager.initiateSocketManagement(RIGHT, rightDataHandler);
 
             _txt0R.setVisibility(View.VISIBLE);
@@ -188,14 +178,6 @@ public class MapActivity extends AppCompatActivity
             _txt2R.setVisibility(View.VISIBLE);
             _txt3R.setVisibility(View.VISIBLE);
             rightBtnActive = true;
-        }
-    }
-
-    private void logGattServices(List<BluetoothGattService> gattServices)
-    {
-        for (BluetoothGattService i : gattServices)
-        {
-            Log.i(TAG, "Available service:" + i.toString());
         }
     }
 
@@ -285,9 +267,6 @@ public class MapActivity extends AppCompatActivity
             Log.v("MapActivity", "savedInstanceState is NULL");
         }
 
-        myFSoleApplication = (FSoleApplication) getApplication();
-        final BluetoothManager mBluetoothManager = myFSoleApplication.getmBluetoothManager();
-
         _imgBtnLeft = (ImageButton) findViewById(R.id._imgBtnLeft);
         _imgBtnRight = (ImageButton) findViewById(R.id._imgBtnRight);
 
@@ -314,7 +293,7 @@ public class MapActivity extends AppCompatActivity
                 else
                 {
                     //TODO: Open dialog instead
-                    stopService(new Intent(MapActivity.this, LeftSoleBluetoothService.class));
+                    mBluetoothManager.closeDeviceConnection(LEFT);
                 }
 
             }
@@ -334,7 +313,7 @@ public class MapActivity extends AppCompatActivity
                 else
                 {
                     //TODO: Open dialog instead
-                    stopService(new Intent(MapActivity.this, RightSoleBluetoothService.class));
+                    mBluetoothManager.closeDeviceConnection(RIGHT);
                 }
 
             }
@@ -347,12 +326,10 @@ public class MapActivity extends AppCompatActivity
         IntentFilter filter = new IntentFilter();
         filter.addAction(SoleBluetoothService.ACTION_GATT_CONNECTED);
         filter.addAction(SoleBluetoothService.ACTION_GATT_DISCONNECTED);
-        filter.addAction(SoleBluetoothService.ACTION_GATT_SERVICES_DISCOVERED);
         filter.addAction(SoleBluetoothService.ACTION_DATA_AVAILABLE);
 
         registerReceiver(mGATTUpdateReceiver, filter);
     }
-
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data)
@@ -366,32 +343,13 @@ public class MapActivity extends AppCompatActivity
 
             String dir = data.getStringExtra(DIRECTION);
             BluetoothDevice device = data.getParcelableExtra(DEVICE);
-            final BluetoothManager mBluetoothManager = myFSoleApplication.getmBluetoothManager();
-
-            switch(dir)
+            if (!mBound)
             {
-                case LEFT:
-                    Log.v("MapActivity", "Connecting to: " + device.getName());
-                    // start connection here
-                    //mBluetoothManager.initiateDeviceConnection(device, LEFT);
-                    Intent leftIntent = new Intent(this, LeftSoleBluetoothService.class);
-                    leftIntent.putExtra(DEVICE, device);
-                    leftIntent.putExtra(DIRECTION, LEFT);
-                    // Bind service to BluetoothManager
-
-                    //startService(leftIntent);
-                    break;
-                case RIGHT:
-                    Log.v("MapActivity", "Connecting to: " + device.getName());
-                    // start connection here
-                    //mBluetoothManager.initiateDeviceConnection(device, RIGHT);
-                    Intent rightIntent = new Intent(this, RightSoleBluetoothService.class);
-                    rightIntent.putExtra(DEVICE, device);
-                    rightIntent.putExtra(DIRECTION, RIGHT);
-                    startService(rightIntent);
-                    break;
+                Log.e("MapActivity", "BluetoothManager is not bound!");
+                return;
             }
 
+            mBluetoothManager.initiateDeviceConnection(device, dir);
         }
     }
 
@@ -418,13 +376,6 @@ public class MapActivity extends AppCompatActivity
 
         super.onRestoreInstanceState(savedInstanceState);
         Log.v("MapActivity", "Inside of onRestoreInstanceState");
-    }
-
-    @Override
-    protected void onStop()
-    {
-        super.onStop();
-
     }
 
     @Override

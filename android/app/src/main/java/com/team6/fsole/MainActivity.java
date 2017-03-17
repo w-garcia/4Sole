@@ -2,7 +2,11 @@ package com.team6.fsole;
 
 import android.app.Dialog;
 import android.bluetooth.BluetoothAdapter;
+import android.content.ComponentName;
+import android.content.Context;
 import android.content.Intent;
+import android.content.ServiceConnection;
+import android.os.IBinder;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -12,33 +16,16 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.Toast;
 
-public class MainActivity extends AppCompatActivity
+public class MainActivity extends BLEBootActivity
 {
     Integer REQUEST_ENABLE_BT = 0;
-    private FSoleApplication myFSoleApplication;
+    FSoleApplication myFSoleApplication;
 
     @Override
     protected void onCreate(Bundle savedInstanceState)
     {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-
-        myFSoleApplication = (FSoleApplication) getApplication();
-        BluetoothManager mBluetoothManager = myFSoleApplication.getmBluetoothManager();
-        if (mBluetoothManager.getBluetoothOK())
-        {
-            if (!mBluetoothManager.getmBluetoothAdapter().isEnabled())
-            {
-                Intent enableBtIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
-                startActivityForResult(enableBtIntent, REQUEST_ENABLE_BT);
-            }
-        }
-        else
-        {
-            // bluetooth not supported on this device.
-            Toast.makeText(myFSoleApplication, "Bluetooth is not supported on this device.", Toast.LENGTH_SHORT).show();
-            finish();
-        }
 
         Button _btnMap = (Button) findViewById(R.id._btnMap);
         Button _btnSession = (Button) findViewById(R.id._btnSession);
@@ -50,7 +37,6 @@ public class MainActivity extends AppCompatActivity
                 Intent activityChangeIntent = new Intent(MainActivity.this, MapActivity.class);
 
                 startActivity(activityChangeIntent);
-
             }
         });
 
@@ -64,6 +50,30 @@ public class MainActivity extends AppCompatActivity
                 startActivity(sessionChangeIntent);
             }
         });
+    }
+
+
+    @Override
+    protected void onServiceReady()
+    {
+        super.onServiceReady();
+
+        if (mBluetoothManager.getBluetoothOK())
+        {
+            //TODO: Handle case where service is not ready and user has bluetooth off. (disable buttons)
+            if (!mBluetoothManager.getmBluetoothAdapter().isEnabled())
+            {
+                Intent enableBtIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
+                startActivityForResult(enableBtIntent, REQUEST_ENABLE_BT);
+            }
+        }
+        else
+        {
+            // bluetooth not supported on this device.
+            myFSoleApplication = (FSoleApplication) getApplication();
+            Toast.makeText(myFSoleApplication, "Bluetooth is not supported on this device.", Toast.LENGTH_SHORT).show();
+            finish();
+        }
     }
 
     @Override

@@ -11,6 +11,7 @@ import android.bluetooth.BluetoothProfile;
 import android.bluetooth.BluetoothSocket;
 import android.content.BroadcastReceiver;
 import android.content.Intent;
+import android.os.Binder;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.os.Message;
@@ -34,6 +35,9 @@ import android.os.Handler;
 
 public class SoleBluetoothService extends Service
 {
+    //Binder given to clients
+    private final IBinder _binder = new SoleBluetoothServiceBinder();
+
     private static final String TAG = "SoleBluetoothService";
 
     private BluetoothManager mBluetoothManager;
@@ -189,7 +193,7 @@ public class SoleBluetoothService extends Service
     @Override
     public IBinder onBind(Intent intent)
     {
-        return null;
+        return _binder;
     }
 
 
@@ -211,5 +215,13 @@ public class SoleBluetoothService extends Service
 
         Log.v(TAG, "Service destroyed!");
         super.onDestroy();
+    }
+
+    public class SoleBluetoothServiceBinder extends Binder
+    {
+        SoleBluetoothService getService()
+        {
+            return SoleBluetoothService.this;
+        }
     }
 }

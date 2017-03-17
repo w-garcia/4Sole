@@ -2,6 +2,7 @@ package com.team6.fsole;
 
 import android.app.Activity;
 import android.app.Application;
+import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
 
@@ -15,7 +16,7 @@ public class FSoleApplication extends Application
     private Boolean leftSoleConnected = false;
     private Boolean rightSoleConnected = false;
 
-    private BluetoothManager mBluetoothManager = new BluetoothManager();
+    //private BluetoothManager mBluetoothManager = new BluetoothManager();
 
 
     private static final String CLASS_NAME = FSoleApplication.class.getSimpleName();
@@ -65,6 +66,7 @@ public class FSoleApplication extends Application
         {
             Log.d(CLASS_NAME, "Tried to increment number of paired devices past 2.");
         }
+
     }
 
     public void decrementPairedSoles()
@@ -103,10 +105,10 @@ public class FSoleApplication extends Application
         }
     }
 
-    public BluetoothManager getmBluetoothManager()
-    {
-        return mBluetoothManager;
-    }
+    //public BluetoothManager getmBluetoothManager()
+    //{
+    //    return mBluetoothManager;
+    //}
 
     public Boolean getLeftSoleConnected()
     {
