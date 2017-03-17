@@ -127,6 +127,7 @@ public class BluetoothManager extends Service
             else if (SoleBluetoothService.ACTION_GATT_SERVICES_DISCOVERED.equals(action))
             {
                 Log.i(TAG, "ACTION_GATT_SERVICES_DISCOVERED");
+                logGattServices(direction);
             }
             else if (SoleBluetoothService.ACTION_DATA_AVAILABLE.equals(action))
             {
@@ -312,8 +313,22 @@ public class BluetoothManager extends Service
         }
     }
     */
-    private void logGattServices(List<BluetoothGattService> gattServices)
+    private void logGattServices(String dir)
     {
+        List<BluetoothGattService> gattServices;
+
+        switch (dir)
+        {
+            case LEFT:
+                gattServices = leftSoleService.getSupportedGattServices();
+                break;
+            default:
+                gattServices = rightSoleService.getSupportedGattServices();
+                break;
+        }
+
+        if (gattServices == null) return;
+
         for (BluetoothGattService i : gattServices)
         {
             Log.i(TAG, "Available service:" + i.toString());
