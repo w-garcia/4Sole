@@ -77,9 +77,6 @@ public class MapActivity extends BLEBoundActivity
     private final String RIGHT_DATA_HANDLER = "rightDataHandler";
     private static final long SCAN_PERIOD = 10000;
 
-    private final LeftDataHandler leftDataHandler = new LeftDataHandler(this);
-    private final RightDataHandler rightDataHandler = new RightDataHandler(this);
-
     // Constants for trasmitting messages between ConnectThread and UI
     private interface MessageConstants {
         public static final int CONNECTION_GOOD = 0;
@@ -121,12 +118,8 @@ public class MapActivity extends BLEBoundActivity
                 Log.i(TAG, "PING_RESULT");
                 String receivedText = intent.getStringExtra(SoleBluetoothService.EXTRA_DATA);
                 Log.i(TAG, "Received: " + receivedText);
+                updatePressureValues(direction, receivedText);
             }
-            //else
-            //{
-            //    Toast.makeText(MapActivity.this, "Failed to create connection.", Toast.LENGTH_SHORT).show();
-            //}
-
         }
     };
     // END mGATTUpdateReceiver <-----------------------------------------------------
@@ -183,37 +176,29 @@ public class MapActivity extends BLEBoundActivity
         }
     }
 
-    private static class LeftDataHandler extends Handler
+    private void updatePressureValues(String direction, String receivedText)
     {
-        private final WeakReference<MapActivity> mapActivityWeakReference;
+        String[] stringValues = receivedText.split(" ");
+        ArrayList<Integer> sensorValues = new ArrayList<>();
 
-        public LeftDataHandler(MapActivity activity)
+        for (int i = 0; i < 4; i++)
         {
-            mapActivityWeakReference = new WeakReference<>(activity);
+            sensorValues.add(Integer.parseInt(stringValues[i]));
         }
 
-        @Override
-        public void handleMessage(Message msg)
+        if (direction.equals(RIGHT))
         {
-            MapActivity activity = mapActivityWeakReference.get();
-            activity.onDataMessageRecieved(msg, "left");
+            _txt0R.setText(String.format(Locale.US, "%d", sensorValues.get(0)));
+            _txt1R.setText(String.format(Locale.US, "%d", sensorValues.get(1)));
+            _txt2R.setText(String.format(Locale.US, "%d", sensorValues.get(2)));
+            _txt3R.setText(String.format(Locale.US, "%d", sensorValues.get(3)));
         }
-    }
-
-    private static class RightDataHandler extends Handler
-    {
-        private final WeakReference<MapActivity> mapActivityWeakReference;
-
-        public RightDataHandler(MapActivity activity)
+        else
         {
-            mapActivityWeakReference = new WeakReference<>(activity);
-        }
-
-        @Override
-        public void handleMessage(Message msg)
-        {
-            MapActivity activity = mapActivityWeakReference.get();
-            activity.onDataMessageRecieved(msg, "right");
+            _txt0L.setText(String.format(Locale.US, "%d", sensorValues.get(0)));
+            _txt1L.setText(String.format(Locale.US, "%d", sensorValues.get(1)));
+            _txt2L.setText(String.format(Locale.US, "%d", sensorValues.get(2)));
+            _txt3L.setText(String.format(Locale.US, "%d", sensorValues.get(3)));
         }
     }
 
@@ -225,32 +210,16 @@ public class MapActivity extends BLEBoundActivity
             Matcher matcher = dataPattern.matcher(payload);
 
             String matches = "";
-            ArrayList<Integer> sensorValues = new ArrayList<>();
+
             while(matcher.find())
             {
                 matches += matcher.group().replace(" ", "") + " ";
-                sensorValues.add(Integer.parseInt(matcher.group().replace(" ", "")));
+
             }
 
             Log.v("MapActivity", "dataPattern matches: " + matches);
 
-            if (sensorValues.size() == 4)
-            {
-                if (tag.equals(RIGHT))
-                {
-                    _txt0R.setText(String.format(Locale.US, "%d", sensorValues.get(0)));
-                    _txt1R.setText(String.format(Locale.US, "%d", sensorValues.get(1)));
-                    _txt2R.setText(String.format(Locale.US, "%d", sensorValues.get(2)));
-                    _txt3R.setText(String.format(Locale.US, "%d", sensorValues.get(3)));
-                }
-                else
-                {
-                    _txt0L.setText(String.format(Locale.US, "%d", sensorValues.get(0)));
-                    _txt1L.setText(String.format(Locale.US, "%d", sensorValues.get(1)));
-                    _txt2L.setText(String.format(Locale.US, "%d", sensorValues.get(2)));
-                    _txt3L.setText(String.format(Locale.US, "%d", sensorValues.get(3)));
-                }
-            }
+
 
             // Parse message for sensor values
             //Toast.makeText(this, payload, Toast.LENGTH_SHORT).show();
