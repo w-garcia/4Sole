@@ -14,6 +14,10 @@ import android.util.Log;
 
 public class BLEBaseActivity extends AppCompatActivity
 {
+    public static final String SerialPortUUID = "0000dfb1-0000-1000-8000-00805f9b34fb";
+    public static final String CommandUUID = "0000dfb2-0000-1000-8000-00805f9b34fb";
+    public static final String ModelNumberStringUUID = "00002a24-0000-1000-8000-00805f9b34fb";
+
     Intent intent;
     BluetoothManager mBluetoothManager;
     Boolean mBound = false;

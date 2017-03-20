@@ -5,6 +5,7 @@ import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothClass;
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothGatt;
+import android.bluetooth.BluetoothGattCharacteristic;
 import android.bluetooth.BluetoothGattService;
 import android.bluetooth.BluetoothSocket;
 import android.content.BroadcastReceiver;
@@ -115,6 +116,16 @@ public class BluetoothManager extends Service
             final String action = intent.getAction();
             final Bundle extras = intent.getExtras();
             final String direction = (String) extras.get(DIRECTION);
+            SoleBluetoothService service;
+
+            if (direction.equals(RIGHT))
+            {
+                service = rightSoleService;
+            }
+            else
+            {
+                service = leftSoleService;
+            }
 
             if (SoleBluetoothService.ACTION_GATT_CONNECTED.equals(action))
             {
@@ -127,15 +138,32 @@ public class BluetoothManager extends Service
             else if (SoleBluetoothService.ACTION_GATT_SERVICES_DISCOVERED.equals(action))
             {
                 Log.i(TAG, "ACTION_GATT_SERVICES_DISCOVERED");
-                logGattServices(direction);
+                service.getGattServices();
             }
             else if (SoleBluetoothService.ACTION_DATA_AVAILABLE.equals(action))
             {
-                // Data received from BLE device
+                // Data received from BLE device.
+                // Perform handshaking or re-broadcast to relevant activities.
                 Log.i(TAG, "ACTION_DATA_AVAILABLE");
-            }
+                if (!service.matchModelCharacteristic())
+                {
+                    String pingResult = intent.getStringExtra(SoleBluetoothService.EXTRA_DATA);
+                    broadcastUpdate(SoleBluetoothService.PING_RESULT, direction, pingResult);
+                    //Log.i(TAG, intent.getStringExtra(SoleBluetoothService.EXTRA_DATA));
+                }
 
+            }
         }
+
+        private void broadcastUpdate(final String action, final String direction, final String result)
+        {
+            final Intent intent = new Intent(action);
+            intent.putExtra(DIRECTION, direction);
+            intent.putExtra(SoleBluetoothService.EXTRA_DATA, result);
+
+            sendBroadcast(intent);
+        }
+
     };
 
     public BluetoothManager()
@@ -173,6 +201,8 @@ public class BluetoothManager extends Service
             receiverRegistered = true;
         }
         //Initiate data management.
+        //rightSoleService.serialSend("PING\n");
+
     }
 
     private void onLeftServiceReady()
@@ -184,6 +214,7 @@ public class BluetoothManager extends Service
             receiverRegistered = true;
         }
         //Initiate data management.
+        //leftSoleService.serialSend("PING\n");
     }
 
     Set<BluetoothDevice> getPairedSoles()
@@ -313,27 +344,7 @@ public class BluetoothManager extends Service
         }
     }
     */
-    private void logGattServices(String dir)
-    {
-        List<BluetoothGattService> gattServices;
 
-        switch (dir)
-        {
-            case LEFT:
-                gattServices = leftSoleService.getSupportedGattServices();
-                break;
-            default:
-                gattServices = rightSoleService.getSupportedGattServices();
-                break;
-        }
-
-        if (gattServices == null) return;
-
-        for (BluetoothGattService i : gattServices)
-        {
-            Log.i(TAG, "Available service:" + i.toString());
-        }
-    }
     public class BluetoothManagerBinder extends Binder
     {
         BluetoothManager getService()

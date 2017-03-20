@@ -115,10 +115,12 @@ public class MapActivity extends BLEBoundActivity
                 Log.i(TAG, "ACTION_GATT_DISCONNECTED");
                 onDisconnectMessageRecieved(direction);
             }
-            else if (SoleBluetoothService.ACTION_DATA_AVAILABLE.equals(action))
+            else if (SoleBluetoothService.PING_RESULT.equals(action))
             {
                 // Data received from BLE device
-                Log.i(TAG, "ACTION_DATA_AVAILABLE");
+                Log.i(TAG, "PING_RESULT");
+                String receivedText = intent.getStringExtra(SoleBluetoothService.EXTRA_DATA);
+                Log.i(TAG, "Received: " + receivedText);
             }
             //else
             //{
@@ -322,11 +324,11 @@ public class MapActivity extends BLEBoundActivity
         // ACTION_GATT_CONNECTED: connected to a GATT server.
         // ACTION_GATT_DISCONNECTED: disconnected from a GATT server.
         // ACTION_GATT_SERVICES_DISCOVERED: discovered GATT services.
-        // ACTION_DATA_AVAILABLE: received data from the device. This can be a result of read or notification operations.
+        // PING_RESULT: received sole data from the device after PING event.
         IntentFilter filter = new IntentFilter();
         filter.addAction(SoleBluetoothService.ACTION_GATT_CONNECTED);
         filter.addAction(SoleBluetoothService.ACTION_GATT_DISCONNECTED);
-        filter.addAction(SoleBluetoothService.ACTION_DATA_AVAILABLE);
+        filter.addAction(SoleBluetoothService.PING_RESULT);
 
         registerReceiver(mGATTUpdateReceiver, filter);
     }
