@@ -13,38 +13,38 @@ int fsrReading3;
 
 void check_threshold(int ps, int id)
 {
-  Serial.print("A");
-  Serial.print(id);
-  Serial.print(": ");
+  //Serial.print("A");
+  //Serial.print(id);
+  //Serial.print(": ");
   Serial.print(ps);
   Serial.print(" ");
   // We'll have a few threshholds, qualitatively determined
   if (ps < 10) 
   {
-    Serial.println(" - No pressure");
+    //Serial.println(" - No pressure");
   } 
   else if (ps < 200) 
   {
-    Serial.println(" - Light touch");
+    //Serial.println(" - Light touch");
   } 
   else if (ps < 500) 
   {
-    Serial.println(" - Light squeeze");
+    //Serial.println(" - Light squeeze");
   } 
   else if (ps < 800) 
   {
-    Serial.println(" - Medium squeeze");
+    //Serial.println(" - Medium squeeze");
   } 
   else 
   {
-    Serial.println(" - Big squeeze");
+    //Serial.println(" - Big squeeze");
   }
 }
 
 
 void read_pressure()
 { 
-  Serial.println("Analog reading = ");
+  //Serial.println("Analog reading = ");
    
   fsrReading0 = analogRead(fsrPin0);
   check_threshold(fsrReading0, fsrPin0);   
