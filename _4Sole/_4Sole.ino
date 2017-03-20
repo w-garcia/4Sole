@@ -52,7 +52,7 @@ void loop()
           digitalWrite(motor2, HIGH);
           digitalWrite(motor3, HIGH);
           digitalWrite(motor4, HIGH);
-          Serial.println("SESSION ON");
+          Serial.println("S_ON");
         }
         else if (inputString == "END")
         {
@@ -60,7 +60,7 @@ void loop()
           digitalWrite(motor2, LOW);
           digitalWrite(motor3, LOW);
           digitalWrite(motor4, LOW);
-          Serial.println("SESSION OFF");
+          Serial.println("S_OFF");
         }
       inputString = "";
     }
