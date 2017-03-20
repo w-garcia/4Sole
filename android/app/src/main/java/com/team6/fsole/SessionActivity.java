@@ -57,6 +57,7 @@ public class SessionActivity extends BLEBoundActivity
             public void onClick(View v)
             {
                 countDownTimer.start();
+                mBluetoothManager.startSession();
                 //_mBlueToothManager.startSession();
             }
         });
@@ -74,6 +75,7 @@ public class SessionActivity extends BLEBoundActivity
     private void stopSession()
     {
         countDownTimer.cancel();
+        mBluetoothManager.endSession();
         //_mBlueToothManager.endSession();
     }
 }

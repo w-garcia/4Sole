@@ -42,6 +42,8 @@ public class BluetoothManager extends Service
     static final String LEFT = "left";
     static final String RIGHT = "right";
     static final String DEVICE = "device";
+    static final String SESSION_OFF = "S_OFF";
+    static final String SESSION_ON = "S_ON";
 
     private BluetoothAdapter mBluetoothAdapter;
     private Boolean BluetoothOK;
@@ -148,7 +150,12 @@ public class BluetoothManager extends Service
                 if (!service.matchModelCharacteristic())
                 {
                     String pingResult = intent.getStringExtra(SoleBluetoothService.EXTRA_DATA);
-                    broadcastUpdate(SoleBluetoothService.PING_RESULT, direction, pingResult);
+                    Log.i(TAG, "Received: " + pingResult);
+                    if (!pingResult.equals(SESSION_OFF) && !pingResult.equals(SESSION_ON))
+                    {
+                        // We get pressure values.
+                        broadcastUpdate(SoleBluetoothService.PING_RESULT, direction, pingResult);
+                    }
                     //Log.i(TAG, intent.getStringExtra(SoleBluetoothService.EXTRA_DATA));
                 }
 
@@ -283,6 +290,19 @@ public class BluetoothManager extends Service
         }
         Log.v(TAG, "Closed connection to " + dir);
     }
+
+    public void stopSolePinging()
+    {
+        if (leftSoleService != null)
+        {
+            leftSoleService.stopContinuousPinging();
+        }
+        if (rightSoleService != null)
+        {
+            rightSoleService.stopContinuousPinging();
+        }
+    }
+
 /*
     void setLeftSoleSocket(BluetoothSocket leftSoleSocket)
     {
@@ -304,46 +324,31 @@ public class BluetoothManager extends Service
         foundDevices = newList;
     }
 
-    /*
-    void initiateSocketManagement(String tag, Handler dataHandler)
-    {
-        if (tag.equals(RIGHT) && RightSoleSocket.isConnected())
-        {
-            RightSoleService = new SoleBluetoothService(RightSoleSocket, dataHandler);
-            RightSoleService.getConnectedThread().start();
-        }
-        else
-        {
-            LeftSoleService = new SoleBluetoothService(LeftSoleSocket, dataHandler);
-            LeftSoleService.getConnectedThread().start();
-        }
-    }
 
     void startSession()
     {
-        if (RightSoleService != null)
+        if (rightSoleService != null)
         {
-            RightSoleService.getConnectedThread().write("START\r\n".getBytes());
+            rightSoleService.serialSend("START\r\n");
         }
 
-        if (LeftSoleService != null)
+        if (leftSoleService != null)
         {
-            LeftSoleService.getConnectedThread().write("START\r\n".getBytes());
+            leftSoleService.serialSend("START\r\n");
         }
     }
 
     void endSession()
     {
-        if (RightSoleService != null)
+        if (rightSoleService != null)
         {
-            RightSoleService.getConnectedThread().write("END\r\n".getBytes());
+            rightSoleService.serialSend("END\r\n");
         }
-        if (LeftSoleService != null)
+        if (leftSoleService != null)
         {
-            LeftSoleService.getConnectedThread().write("END\r\n".getBytes());
+            leftSoleService.serialSend("END\r\n");
         }
     }
-    */
 
     public class BluetoothManagerBinder extends Binder
     {

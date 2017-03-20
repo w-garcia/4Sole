@@ -596,7 +596,7 @@ public class SoleBluetoothService extends Service
         isPinging = true;
     }
 
-    private void stopContinuousPinging()
+    public void stopContinuousPinging()
     {
         if (pingerHandle != null)
         {

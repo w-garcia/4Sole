@@ -117,7 +117,7 @@ public class MapActivity extends BLEBoundActivity
                 // Data received from BLE device
                 Log.i(TAG, "PING_RESULT");
                 String receivedText = intent.getStringExtra(SoleBluetoothService.EXTRA_DATA);
-                Log.i(TAG, "Received: " + receivedText);
+                //Log.i(TAG, "Received: " + receivedText);
                 updatePressureValues(direction, receivedText);
             }
         }
@@ -183,7 +183,15 @@ public class MapActivity extends BLEBoundActivity
 
         for (int i = 0; i < 4; i++)
         {
-            sensorValues.add(Integer.parseInt(stringValues[i]));
+            try
+            {
+                sensorValues.add(Integer.parseInt(stringValues[i]));
+            }
+            catch (NumberFormatException e)
+            {
+                Log.e(TAG, e.getMessage());
+                return;
+            }
         }
 
         if (direction.equals(RIGHT))
@@ -353,7 +361,10 @@ public class MapActivity extends BLEBoundActivity
     protected void onDestroy()
     {
         super.onDestroy();
-
+        if (mBluetoothManager != null)
+        {
+            mBluetoothManager.stopSolePinging();
+        }
         unregisterReceiver(mGATTUpdateReceiver);
     }
 
