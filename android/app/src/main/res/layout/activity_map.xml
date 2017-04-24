@@ -475,7 +475,9 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:layout_weight="0.5"
-            android:stretchColumns="*">
+            android:stretchColumns="*"
+            android:clipChildren="false"
+            >
 
             <TableRow
                 android:layout_width="0dp"
@@ -513,7 +515,10 @@
                     android:clickable="false"
                     android:layout_gravity="bottom|center"
                     android:layout_weight="1"
-                    android:visibility="invisible" />
+                    android:visibility="invisible"
+                    app:srcCompat="@drawable/green"
+                    android:background="@android:color/transparent"
+                    android:rotation="85"/>
 
                 <ImageButton
                     android:text="0"
@@ -545,7 +550,10 @@
                     android:clickable="false"
                     android:layout_width="wrap_content"
                     android:layout_weight="1"
-                    android:visibility="invisible"/>
+                    android:visibility="invisible"
+                    android:background="@android:color/transparent"
+                    app:srcCompat="@drawable/green"
+                    android:rotation="-75"/>
 
                 <ImageButton
                     android:text="0"
@@ -640,7 +648,12 @@
                     android:id="@+id/_colorView0L"
                     android:layout_weight="1"
                     android:visibility="invisible"
-                    android:layout_gravity="right|center"/>
+                    android:layout_gravity="right|center"
+                    app:srcCompat="@drawable/green"
+                    android:rotation="-105"
+                    android:background="@android:color/transparent"
+                    android:scaleY=".7"
+                    android:paddingTop="25dp"/>
 
                 <ImageButton
                     android:text="0"
@@ -658,7 +671,12 @@
                     android:clickable="false"
                     android:layout_weight="1"
                     android:visibility="invisible"
-                    android:layout_gravity="left|center"/>
+                    android:layout_gravity="left|center"
+                    android:background="@android:color/transparent"
+                    android:rotation="-85"
+                    app:srcCompat="@drawable/green"
+                    android:paddingBottom="35dp"
+                    android:scaleY=".7"/>
 
                 <ImageButton
                     android:text="0"
@@ -675,7 +693,8 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:layout_weight="0.5"
-            android:stretchColumns="*">
+            android:stretchColumns="*"
+            android:clipChildren="false">
 
             <TableRow
                 android:layout_width="match_parent"
@@ -683,7 +702,6 @@
                 android:layout_weight=".25">
 
                 <ImageButton
-                    android:text="0"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:id="@+id/colorView38"
@@ -691,17 +709,18 @@
                     android:layout_weight="1"/>
 
                 <ImageButton
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
                     android:id="@+id/_colorView1R"
-                    android:text="0"
                     android:clickable="false"
                     android:layout_gravity="bottom|center_horizontal"
                     android:layout_weight="1"
-                    android:visibility="invisible"/>
+                    android:visibility="invisible"
+                    android:background="@android:color/transparent"
+                    android:layout_height="wrap_content"
+                    android:layout_width="wrap_content"
+                    app:srcCompat="@drawable/green"
+                    android:rotation="-85"/>
 
                 <ImageButton
-                    android:text="0"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:id="@+id/colorView25"
@@ -709,7 +728,6 @@
                     android:layout_weight="1"/>
 
                 <ImageButton
-                    android:text="0"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:id="@+id/colorView24"
@@ -717,7 +735,6 @@
                     android:layout_weight="1"/>
 
                 <ImageButton
-                    android:text="0"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:id="@+id/colorView23"
@@ -756,14 +773,17 @@
                     android:layout_weight="1"/>
 
                 <ImageButton
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
+                    android:layout_width="wrap_content"
                     android:id="@+id/_colorView2R"
                     android:text="0"
                     android:clickable="false"
                     android:layout_weight="1"
                     android:layout_gravity="right"
-                    android:visibility="invisible"/>
+                    android:visibility="invisible"
+                    app:srcCompat="@drawable/green"
+                    android:background="@android:color/transparent"
+                    android:rotation="75"
+                    android:layout_height="wrap_content"/>
 
                 <ImageButton
                     android:text="0"
@@ -836,14 +856,18 @@
                     android:layout_weight="1"/>
 
                 <ImageButton
-                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:id="@+id/_colorView3R"
-                    android:text="0"
                     android:clickable="false"
-                    android:layout_gravity="center|right"
+                    android:layout_gravity="right|center"
                     android:layout_weight="1"
-                    android:visibility="invisible"/>
+                    android:visibility="invisible"
+                    app:srcCompat="@drawable/green"
+                    android:background="@android:color/transparent"
+                    android:rotation="85"
+                    android:scaleY=".7"
+                    android:paddingBottom="35dp"
+                    />
 
                 <ImageButton
                     android:text="0"
@@ -855,13 +879,18 @@
 
                 <ImageButton
                     android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
+                    android:layout_height="match_parent"
                     android:id="@+id/_colorView0R"
                     android:text="0"
                     android:clickable="false"
                     android:layout_gravity="center|left"
                     android:layout_weight="1"
-                    android:visibility="invisible"/>
+                    android:visibility="invisible"
+                    android:background="@android:color/transparent"
+                    app:srcCompat="@drawable/green"
+                    android:rotation="105"
+                    android:scaleY=".7"
+                    android:paddingTop="25dp"/>
 
                 <ImageButton
                     android:text="0"
